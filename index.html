@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学习自律助手</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(5px); }
+            50% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+            100% { transform: translateX(0); }
+        }
+        .animate-shake {
+            animation: shake 0.4s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+    <!-- 主题切换 -->
+    <button id="themeToggle" class="fixed top-4 right-4 z-50 p-3 rounded-full bg-white/80 dark:bg-gray-800/80 backdrop-blur shadow-lg hover:scale-105 transition-transform">
+        <i class="fas fa-sun text-amber-500 dark:hidden"></i>
+        <i class="fas fa-moon text-indigo-400 hidden dark:inline"></i>
+    </button>
+
+    <main class="container mx-auto px-4 py-8 max-w-3xl">
+        <!-- 特别提醒 -->
+        <div class="mb-8 opacity-0 translate-y-6 transition-all duration-500 animate-shake bg-red-100 dark:bg-red-900/20 p-4 rounded-xl text-center">
+            <i class="fas fa-exclamation-triangle text-red-500 mr-2"></i>
+            <span class="font-medium text-red-600 dark:text-red-300">王珊，你不能这样！</span>
+        </div>
+
+        <!-- 学习任务看板 -->
+        <section class="mb-8 opacity-0 translate-y-6 transition-all duration-500">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow">
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4 flex items-center">
+                    <i class="fas fa-list-check text-blue-500 mr-2"></i>
+                    今日学习任务
+                </h2>
+                <div class="space-y-3">
+                    <div class="flex items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                        <input type="checkbox" class="w-5 h-5 mr-3 rounded border-gray-300">
+                        <span class="flex-1 text-gray-600 dark:text-gray-300">学习申论</span>
+                        <span class="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 text-sm rounded-full">高优先级</span>
+                    </div>
+                    <!-- 更多任务项... -->
+                </div>
+            </div>
+        </section>
+
+        <!-- 专注计时器 -->
+        <section class="mb-8 opacity-0 translate-y-6 transition-all duration-500">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow">
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4 flex items-center">
+                    <i class="fas fa-hourglass-half text-purple-500 mr-2"></i>
+                    专注倒计时
+                </h2>
+                <div class="flex flex-col items-center py-6">
+                    <div class="relative w-32 h-32 mb-4">
+                        <div class="absolute inset-0 border-4 border-blue-200 rounded-full"></div>
+                        <div class="absolute inset-0 border-4 border-blue-500 rounded-full clip-path-[circle(50% at 50% 50%)]"></div>
+                        <span class="absolute inset-0 flex items-center justify-center text-2xl font-bold text-blue-500">25:00</span>
+     </div>
+                    <div class="flex space-x-4">
+                        <button class="px-6 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors">
+                            <i class="fas fa-play mr-2"></i>开始
+                        </button>
+                        <button class="px-6 py-2 bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                            <i class="fas fa-pause mr-2"></i>暂停
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 学习统计 -->
+        <section class="opacity-0 translate-y-6 transition-all duration-500">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-shadow">
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-4 flex items-center">
+                    <i class="fas fa-chart-pie text-green-500 mr-2"></i>
+                    学习统计
+                </h2>
+                <canvas id="studyChart" class="w-full h-64"></canvas>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
+        <div class="text-center space-y-2 opacity-0 translate-y-6 transition-all duration-500">
+            <p class="text-gray-600 dark:text-gray-400">
+                作者: 小吕
+            </p>
+            <p class="text-sm text-gray-500 dark:text-gray-400"> 2024 学习自律系统</p>
+        </div>
+    </footer>
+
+    <script>
+        // 主题切换
+        const themeToggle = document.getElementById('themeToggle');
+        themeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+        });
+
+        // 初始化主题
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+
+        // 滚动动画
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.opacity-0').forEach(el => observer.observe(el));
+
+        // 学习统计图表
+        const ctx = document.getElementById('studyChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['申论', '言语', '资料', '常识'],
+                datasets: [{
+                    data: [35, 25, 15, 10],
+                    backgroundColor: ['#3B82F6', '#10B981', '#8B5CF6', '#F59E0B'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: '#6B7280'
+                        }
+                    }
+                }
+            }
+        });
+
+        // 自动触发提醒动画
+        setInterval(() => {
+            document.querySelector('.animate-shake').classList.add('animate-shake');
+            setTimeout(() => {
+                document.querySelector('.animate-shake').classList.remove('animate-shake');
+            }, 500);
+        }, 30000); // 每30秒提醒一次
+    </script>
+</body>
+</html>
